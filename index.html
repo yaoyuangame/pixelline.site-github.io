@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PiexlLINE Game - Pixel Line Studio</title>
+    <style>
+        :root {
+            --bg: #07070f;
+            --bg2: #0d0d1a;
+            --surface: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.10);
+            --text: #eef0f7;
+            --muted: #9aa1b5;
+            --accent-a: #7c3aed;
+            --accent-b: #22d3ee;
+            --grad: linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+        /* faint glow */
+        .glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(600px 400px at 85% -10%, rgba(124,58,237,0.22), transparent 60%),
+                radial-gradient(600px 400px at -10% 20%, rgba(34,211,238,0.16), transparent 60%);
+            z-index: 0;
+        }
+
+        /* nav */
+        nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 0;
+            position: relative; z-index: 2;
+        }
+        .logo {
+            font-size: 18px; font-weight: 800; letter-spacing: 1px;
+            background: var(--grad); -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links a {
+            color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+            margin-left: 30px; transition: color .2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+
+        /* hero */
+        .hero { padding: 72px 0 64px; position: relative; z-index: 1; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+            color: var(--accent-b);
+            border: 1px solid rgba(34,211,238,0.35);
+            background: rgba(34,211,238,0.08);
+            padding: 6px 16px; border-radius: 999px; margin-bottom: 26px;
+        }
+        h1 {
+            font-size: clamp(38px, 6vw, 62px);
+            font-weight: 800; line-height: 1.05; letter-spacing: -1px;
+            margin-bottom: 22px;
+        }
+        h1 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p.lede { font-size: 18px; color: var(--muted); max-width: 620px; margin-bottom: 30px; }
+        .cta { display: inline-flex; gap: 14px; }
+        a.btn {
+            padding: 12px 26px; border-radius: 12px; font-weight: 600; font-size: 15px;
+            text-decoration: none; transition: transform .15s, box-shadow .2s;
+        }
+        a.btn.solid { background: var(--grad); color: #fff; box-shadow: 0 8px 30px rgba(124,58,237,0.35); }
+        a.btn.solid:hover { transform: translateY(-2px); }
+        a.btn.ghost { border: 1px solid var(--border); color: var(--text); }
+        a.btn.ghost:hover { border-color: var(--accent-b); }
+
+        /* sections */
+        section { padding: 56px 0; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+        .tag { font-size: 12px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+               background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+               margin-bottom: 10px; }
+        h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px; }
+        section > p.lead { color: var(--muted); font-size: 16px; max-width: 640px; margin-bottom: 28px; }
+
+        /* about rows */
+        .about-row { padding: 18px 0; border-bottom: 1px solid var(--border); }
+        .about-row:last-child { border-bottom: none; }
+        .about-row strong { display: block; font-size: 16px; margin-bottom: 4px; }
+        .about-row span { font-size: 14px; color: var(--muted); }
+
+        /* games */
+        .game { padding: 22px 0; border-bottom: 1px solid var(--border); }
+        .game:last-child { border-bottom: none; }
+        .game-name { font-size: 19px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .status { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 999px; letter-spacing: .5px; }
+        .status.live { color: #34d399; background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); }
+        .status.soon { color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); }
+        .game-desc { font-size: 14px; color: var(--muted); }
+
+        /* values */
+        .values { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        @media (max-width: 620px) { .values { grid-template-columns: 1fr; } }
+        .value {
+            padding: 24px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; transition: border-color .2s, transform .2s;
+        }
+        .value:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-3px); }
+        .value .n { font-size: 13px; font-weight: 800; background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .value-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+        .value-desc { font-size: 14px; color: var(--muted); }
+
+        /* updates */
+        .update { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .update:last-child { border-bottom: none; }
+        .update-date { font-size: 12px; font-weight: 700; color: var(--accent-b); letter-spacing: .5px; }
+        .update-text { font-size: 15px; color: #c8cddd; }
+
+        /* faq */
+        .faq { padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .faq:last-child { border-bottom: none; }
+        .faq-q { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .faq-a { font-size: 14px; color: var(--muted); }
+
+        /* contact */
+        .contact-block {
+            margin-top: 20px; padding: 28px; border-radius: 16px;
+            background: var(--surface); border: 1px solid var(--border);
+        }
+        .contact-line { font-size: 15px; color: #d4d8e6; margin-bottom: 8px; }
+        .contact-line a { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; font-weight: 600; }
+        .contact-line a:hover { text-decoration: underline; }
+
+        /* footer */
+        footer { padding: 44px 0 56px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; margin-top: 8px; position: relative; z-index: 1; }
+        .footer-links { margin-bottom: 10px; }
+        .footer-links a { color: var(--muted); text-decoration: none; margin-right: 22px; }
+        .footer-links a:hover { color: var(--text); }
+
+        @media (max-width: 640px) {
+            .nav-links a { margin-left: 16px; font-size: 13px; }
+            .hero { padding: 52px 0 48px; }
+            .cta { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow"></div>
+
+    <div class="wrap">
+        <nav>
+            <div class="logo">PIEXXLINE</div>
+            <div class="nav-links">
+                <a href="#about">About</a>
+                <a href="#games">Games</a>
+                <a href="#values">Values</a>
+                <a href="#updates">Updates</a>
+                <a href="#faq">FAQ</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <div class="badge">✦ INDEPENDENT GAME STUDIO</div>
+            <h1>Games with a<br><span class="grad">pixel-perfect</span> heart.</h1>
+            <p class="lede">PiexlLINE Game is an independent studio crafting bold, colorful and addictive games that players everywhere love to play.</p>
+            <div class="cta">
+                <a class="btn solid" href="#games">View our games</a>
+                <a class="btn ghost" href="#contact">Get in touch</a>
+            </div>
+        </header>
+
+        <section id="about">
+            <div class="tag">About Us</div>
+            <h2>Who we are</h2>
+            <p class="lead">We started PiexlLINE on a simple conviction: games should be vivid, instant, and deeply satisfying. We build games that glow, click, and keep players coming back for more.</p>
+            <div class="about-row"><strong>Our Mission</strong><span>To deliver punchy, high-quality games that feel great from the very first tap.</span></div>
+            <div class="about-row"><strong>Our Approach</strong><span>Tight loops, crisp art, and polish in every frame — no filler, just fun.</span></div>
+            <div class="about-row"><strong>Our Audience</strong><span>Casual players who want quick, colorful entertainment anywhere, anytime.</span></div>
+        </section>
+
+        <section id="games">
+            <div class="tag">Our Games</div>
+            <h2>What we've made</h2>
+            <div class="game">
+                <div class="game-name">Pixel Line <span class="status live">Live</span></div>
+                <div class="game-desc">Our flagship experience — a fast, vibrant arcade game built for satisfying short sessions.</div>
+            </div>
+            <div class="game">
+                <div class="game-name">More titles <span class="status soon">In Development</span></div>
+                <div class="game-desc">New colorful casual games are in the works. Watch this space.</div>
+            </div>
+        </section>
+
+        <section id="values">
+            <div class="tag">What We Believe</div>
+            <h2>Our values</h2>
+            <div class="values">
+                <div class="value"><div class="n">01</div><div class="value-title">Color &amp; Energy</div><div class="value-desc">Bright worlds and big moments. Our games are designed to spark joy.</div></div>
+                <div class="value"><div class="n">02</div><div class="value-title">One More Try</div><div class="value-desc">Tight difficulty curves that make every run feel worth another attempt.</div></div>
+                <div class="value"><div class="n">03</div><div class="value-title">Accessible Fun</div><div class="value-desc">Simple controls and instant onboarding. Anyone can pick up and play.</div></div>
+                <div class="value"><div class="n">04</div><div class="value-title">Respect Your Time</div><div class="value-desc">Quick sessions, zero chore. Our games fit into any spare moment.</div></div>
+            </div>
+        </section>
+
+        <section id="updates">
+            <div class="tag">News &amp; Updates</div>
+            <h2>What's new</h2>
+            <div class="update"><div class="update-date">2026 · September</div><div class="update-text">Pixel Line is live and ready to play — jump in now.</div></div>
+            <div class="update"><div class="update-date">2026 · August</div><div class="update-text">The studio is growing. New colorful titles are in active development.</div></div>
+        </section>
+
+        <section id="faq">
+            <div class="tag">FAQ</div>
+            <h2>Common questions</h2>
+            <div class="faq"><div class="faq-q">Are your games free to play?</div><div class="faq-a">Yes — free to download and play, supported by optional ads and in-game purchases.</div></div>
+            <div class="faq"><div class="faq-q">Do you collect my personal data?</div><div class="faq-a">Only the minimum needed to run and improve the games. See our Privacy Policy for details.</div></div>
+            <div class="faq"><div class="faq-q">Can I partner or collaborate with you?</div><div class="faq-a">We love talking to players and partners — reach out using the contact details below.</div></div>
+            <div class="faq"><div class="faq-q">How do I report a problem?</div><div class="faq-a">Email us and we'll take a look as soon as we can. Your feedback helps us make better games.</div></div>
+        </section>
+
+        <section id="contact">
+            <div class="tag">Contact</div>
+            <h2>Get in touch</h2>
+            <p class="lead">Questions, feedback, or business inquiries — we'd love to hear from you.</p>
+            <div class="contact-block">
+                <div class="contact-line">PiexlLINE Game</div>
+                <div class="contact-line">Email: <a href="mailto:pkeuanganllg@gmail.com">pkeuanganllg@gmail.com</a></div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-links">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+            </div>
+            <div>&copy; 2026 PiexlLINE Game. All rights reserved.</div>
+        </footer>
+    </div>
+</body>
+</html>
